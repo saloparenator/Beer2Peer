@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Beer2Peer chat</title>
+    <link href="bootstrap.min.css" rel="stylesheet"/>
+	  <link rel="stylesheet" href="bootstrap-theme.min.css"/>
+	  
+	  <style type="text/css">
+      
+	  </style>
+	  
+  </head>
+  <body>
+
+    
+    
+    <div id='hobbo' class='container'>
+      <div class="row">
+        <div class="col-md-12">
+          <div class="input-group">
+            <span class="input-group-btn">
+              <button id="connectBtn" class="btn btn-default" type="button">connect</button>
+            </span>
+            <input id="url" name="url" type="text" class="form-control" placeholder="server url and channel" value="wss://hobbo.herokuapp.com/chatroom" aria-describedby="basic-addon1" />
+          </div>
+        </div>
+      </div>
+    </div>
+    <div id='bar' class='container'>
+      <div class="row">
+        <div class="col-md-12">
+          <div class="input-group">
+            <span class="input-group-addon" id="basic-addon1">secret</span>
+            <input id="seed" name="seed" type="text" class="form-control" placeholder="server url and channel" value="wss://hobbo.herokuapp.com/chatroom" aria-describedby="basic-addon1" />
+            <span class="input-group-btn">
+              <button id="seedBtn" class="btn btn-default" type="button">random</button>
+            </span>
+          </div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-md-12">
+          <div class="input-group">
+            <span class="input-group-addon" id="basic-addon1">ident</span>
+            <input id="ident" name="ident" type="text" class="form-control" placeholder="server url and channel" value="wss://hobbo.herokuapp.com/chatroom" aria-describedby="basic-addon1" />
+            <span class="input-group-btn">
+              <button id="annoBtn" class="btn btn-default" type="button">anonymous</button>
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div id='chatroom' class='container'>
+      <div class="row">
+        <div class="col-md-12">
+          <div class="input-group">
+            <span class="input-group-addon" id="basic-addon1">nick</span>
+            <input id="nick" name="nick" type="text" class="form-control" placeholder="your nick" value="me" aria-describedby="basic-addon1" />
+          </div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-md-12">
+          <div class="input-group">
+            <span class="input-group-btn">
+              <button id="sendBtn" class="btn btn-default" type="button">send</button>
+            </span>
+            <input id="msg" name="msg" type="text" class="form-control" placeholder="hello world" aria-describedby="basic-addon1" />
+          </div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-md-8">
+          <div id="msgLst">
+            
+          </div>
+        </div>
+        <div class="col-md-4">
+          <ul class="list-group">
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <script src="jquery-1.11.1.min.js"></script>
+    <script src="cryptico.min.js"></script>
+    <script src="seedrandom.min.js"></script>
+    <script src="mustache.min.js"></script>
+    <script src="beer2peer.js"></script>
+
+    <script>
+
+
+              
+//debugB2p=true;  
+var b2p = null;
+
+            function connectChat(url, rsFunk){
+              var b2p = null;
+              if (url && url != ''){
+                b2p = Beer2Peer.connect("abcdefghijklmnopqrstuvwxyz123456",
+                                        "abcdefghijklmnopqrstuvwxyz123456",
+                                        /*Beer2Peer.generateSeed(),
+                                        Beer2Peer.generateSeed(),*/
+                                        Beer2Peer.hobboConnector(url),
+                                        function (rawdata){
+                  try{
+                    var data = JSON.parse(rawdata);
+                    if (data.nick && data.msg){
+                      rsFunk(data.nick, data.msg);
+                    }
+                  }catch(e){console.log(rawdata);}
+                });
+              }
+              
+              setInterval( function(){b2p.announce();b2p.registerMe();} , 1000);
+              return {
+                send : function(_nick,_msg){
+                  b2p.sendTo("abcdefghijklmnopqrstuvwxyz123456",JSON.stringify({
+                    'nick' : _nick, 
+                    'msg' : _msg
+                  }));
+                }
+              }
+            }
+
+      /**
+       * Annonymous closure main.
+       */
+      //(function(){
+        $(document).ready(function(){
+          var b2pchat = null;
+          $('#connectBtn').click(function(){
+            var b2p = Beer2Peer.connect($('#ident').val(),
+                                        $('#seed').val(),
+                                        Beer2Peer.hobboConnector($('#url').val()),
+                                        function (rawdata){
+                                          var data = JSON.parse(rawdata);
+                                          $('#msgLst').html('<p>' + data.nick + ' : ' + data.msg + '</p>' + $('#msgLst').html());
+                                        });
+            setInterval( function(){b2p.announce();b2p.registerMe()} , 1000);
+            $('#sendBtn').click(function(){
+              b2p.sendTo($('#ident').val(),
+                         JSON.stringify({
+                           nick : $('#nick').val(),
+                           msg : $('#msg').val()
+                         }));
+            });
+          });
+          
+
+          
+          $('#seedBtn').click(function(){
+            $('#seed').val(Beer2Peer.generateSeed());
+          });
+          
+          $('#annoBtn').click(function(){
+            $('#ident').val(Beer2Peer.generateSeed());
+          });
+        });
+      //})();
+      
+      
+    </script>
+    
+    
+    
+    <div id ='minichat'>
+      <div class='container'>
+        <div class='row'>
+          <div class="input-group">
+            <span class="input-group-addon" id="basic-addon1">name</span>
+            <input id="nameInp" name="nameInp" type="text" class="form-control" placeholder="your nick name" aria-describedby="basic-addon1" />
+          </div>
+        </div>
+        <div class='row'>
+          <div class="input-group">
+            <span class="input-group-btn">
+              <button id="pssBtn" class="btn btn-default" type="button">say</button>
+            </span>
+            <input id="pssInp" name="pssInp" type="text" class="form-control" placeholder="something to say" aria-describedby="basic-addon1" />
+          </div>
+        </div>
+        <div class='row'>
+          <ul id='gossip' class="list-group">
+          </ul>
+        </div>
+      </div>
+
+      <script type="text/javascript">
+        function minichat(url,seed,ident,id){
+          //var template = "<div class='container'> <div class='row'> <div class='input-group'> <span class='input-group-addon'>name</span> <input id='{{id}}_nameInp' name='{{id}}_nameInp' type='text' class='form-control' placeholder='your nick name' aria-describedby='basic-addon1'/> </div></div><div class='row'> <div class='input-group'> <span class='input-group-btn'> <button id='{{id}}_pssBtn' class='btn btn-default' type='button'>say</button> </span> <input id='{{id}}_pssInp' name='{{id}}_pssInp' type='text' class='form-control' placeholder='something to say' aria-describedby='basic-addon1'/> </div></div><div class='row'> <ul id='{{id}}_gossip' class='list-group'> </ul> </div></div>";
+          //var templateLine = '<li class="list-group-item">{{nick}} : {{msg}}</li>';
+          $(document).ready(function(){
+            //$('#'+id).empty().html(Mustache.render(template, {'id' :id}));
+            var b2p = Beer2Peer.connect(ident,
+                                        seed,
+                                        Beer2Peer.hobboConnector(url),
+                                        function(rawdata){
+                                          try{
+                                            var data = JSON.parse(rawdata);
+                                            $('#'+id+'_gossip').prepend($(Mustache.render(templateLine, data)));
+                                            //$('#'+id+'_gossip').prepend($('<li>').toggleClass('list-group-item').text(data.nick+' : '+data.msg));
+                                          }catch(e){}
+                                        });
+            $('#'+id+'_pssBtn').click(function(){
+              b2p.sendTo(ident,
+                         JSON.stringify({
+                           msg : $('#'+id+'_pssInp').val(),
+                           nick : $('#'+id+'_nameInp').val()
+                         }));
+            });
+            setInterval( function(){b2p.registerMe()} , 1000);
+          });
+        }
+      </script>
+      
+      <!--
+      <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mustache.js/0.8.1/mustache.min.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/cryptico/0.0.1343522940/cryptico.min.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/seedrandom/2.3.11/seedrandom.min.js"></script>
+      <script src="beer2peer.js"></script>
+      <script type="text/javascript" src="">
+        function minichat(e,t,n,r){var i="<div class='container'> <div class='row'> <div class='input-group'> <span class='input-group-addon'>name</span> <input id='{{id}}_nameInp' name='{{id}}_nameInp' type='text' class='form-control' placeholder='your nick name' aria-describedby='basic-addon1'/> </div></div><div class='row'> <div class='input-group'> <span class='input-group-btn'> <button id='{{id}}_pssBtn' class='btn btn-default' type='button'>say</button> </span> <input id='{{id}}_pssInp' name='{{id}}_pssInp' type='text' class='form-control' placeholder='something to say' aria-describedby='basic-addon1'/> </div></div><div class='row'> <ul id='{{id}}_gossip' class='list-group'> </ul> </div></div>";var s='<li class="list-group-item">{{nick}} : {{msg}}</li>';$(document).ready(function(){$("#"+r).empty().html(Mustache.render(i,{id:r}));var o=Beer2Peer.connect(n,t,Beer2Peer.hobboConnector(e),function(e){try{var t=JSON.parse(e);$("#"+r+"_gossip").prepend($(Mustache.render(s,t)))}catch(n){}});$("#"+r+"_pssBtn").click(function(){o.sendTo(n,JSON.stringify({msg:$("#"+r+"_pssInp").val(),nick:$("#"+r+"_nameInp").val()}))});setInterval(function(){o.registerMe()},1e3)})}
+        
+        var url = 'wss://hobbo.herokuapp.com/funnyname';
+        var seed = 'rMBUYL7LqNGNuWAswgJZGJwUltN3eEf7';
+        var ident = 'fC9X6lqLHqi7jHvCHKMi6Xbq7Rx1UWoa';
+        var id = 'minichat';
+        minichat(url,seed,ident,id);
+      </script>
+      -->
+    </div>
+    
+  </body>
+</html>

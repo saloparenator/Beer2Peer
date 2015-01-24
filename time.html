@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Beer2Peer Time</title>
+    <link href="bootstrap.min.css" rel="stylesheet"/>
+	  <link rel="stylesheet" href="bootstrap-theme.min.css"/>
+	  
+	  <style type="text/css">
+
+	  </style>
+	  
+  </head>
+  <body>
+    
+    <div class='container'>
+      <h1 id='time'></h1>
+    </div>
+
+    <script src="jquery-1.11.1.min.js"></script>
+    <script src="cryptico.min.js"></script>
+    <script src="seedrandom.min.js"></script>
+    <script src="beer2peer.js"></script>
+
+    <script>
+
+      
+      /**
+       * Annonymous closure main.
+       */
+      (function(){
+        $.get('https://baconipsum.com/api/?type=meat-and-filler',function(data){
+          console.log(data);
+        });
+        
+        //when document is fully loaded
+        $(document).ready(function (){
+          var b2p = Beer2Peer.connect('time',
+                  Beer2Peer.generateSeed(),
+                  Beer2Peer.hobboConnector('wss://hobbo.herokuapp.com/testing'),
+                  function(data){console.log('rx %s',data)});
+                  
+          setInterval( function(){
+            var t = String(new Date().getTime());
+            console.log('tx %s',t);
+            b2p.sendTo('ping',JSON.stringify({time : t}));
+            b2p.sendTo('log',JSON.stringify({time : t}));
+            $('#time').text(t);
+          } , 3000);
+          
+          setInterval( function(){b2p.announce();} , 1000);
+        });
+        
+                  
+        
+      })();
+      
+
+    </script>
+    
+  </body>
+</html>

@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Beer2Peer log</title>
+    <link href="bootstrap.min.css" rel="stylesheet"/>
+	  <link rel="stylesheet" href="bootstrap-theme.min.css"/>
+	  
+	  <style type="text/css">
+
+	  </style>
+	  
+  </head>
+  <body>
+    
+    <div class='container'>
+      <h5 id='log'></h5>
+    </div>
+
+    <script src="jquery-1.11.1.min.js"></script>
+    <script src="cryptico.min.js"></script>
+    <script src="seedrandom.min.js"></script>
+    <script src="beer2peer.js"></script>
+
+    <script>
+
+      /**
+       * Annonymous closure main.
+       */
+      (function(){
+        //when document is fully loaded
+        $(document).ready(function (){
+
+          var send = Beer2Peer.hobboConnector('wss://hobbo.herokuapp.com/testing')(function(data){
+            console.log(data);
+            $('#log').text(JSON.stringify(data));
+          });
+          
+        });
+        
+      })();
+      
+      
+
+    </script>
+    
+  </body>
+</html>

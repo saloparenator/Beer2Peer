@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+    <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Beer2Peer chat</title>
+    <link href="bootstrap.min.css" rel="stylesheet"/>
+	  <link rel="stylesheet" href="bootstrap-theme.min.css"/>
+	  
+	  <style type="text/css">
+      
+	  </style>
+	  
+    </head>
+    <body>
+      <div id='minichat'></div>
+      <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mustache.js/0.8.1/mustache.min.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/cryptico/0.0.1343522940/cryptico.min.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/seedrandom/2.3.11/seedrandom.min.js"></script>
+      <script type="text/javascript">
+          var debugB2p=false;var debugConnector=false;var Beer2Peer={fetchTrueRandomSeed:function(){new XMLHttpRequest;$.get("https://www.random.org/integers/?num=256&min=0&max=255&col=1&base=16&format=plain&rnd=new",function(e){Math.seedrandom(e)})},fetchBaconIpsum:function(){$.get("https://baconipsum.com/api/?type=meat-and-filler",function(e){console.log(e)})},generateSeed:function(){return btoa(Math.random())},hobboConnector:function(e){function t(t,n,r){function s(t){if(i.readyState!=1)return false;if(debugConnector){console.log("hobbo %s sent %s",e,t)}i.send(JSON.stringify(t));return true}function o(){i.close()}var i=new WebSocket(e);if(debugConnector){console.log(i)}i.onopen=function(){console.log("hobbo connected to %s",e);if(n){n()}};i.onclose=function(){console.log("hobbo disconnected from %s",e);if(n){r()}};i.onmessage=function(n){if(debugConnector){console.log("hobbo %s recieved %s",e,n.data)}t(JSON.parse(n.data))};return{send:s,close:o}}return t},connect:function(e,t,n,r){function h(t){if(debugB2p){console.log("b2p %s register %s",e,t)}c[t.who]={how:t.how};if(debugB2p){console.log("b2p %s directory %s",e,c)}}function p(t){if(debugB2p){console.log("b2p %s rx %s",e,t)}if(t){if(t.who&&t.how&&t.who!=s){h(t)}else if(t.who==s&&t.what){f(i.decrypt(t.what,o))}}else{if(debugB2p){console.log(" b2p %s nothing",e)}}}function d(){l=true}function v(){l=false}function g(){m.send(a)}function y(t,n){if(debugB2p){console.log("b2p %s tx to %s val %s",e,t,n)}if(l){if(t in c){m.send({who:t,what:i.crypt(n,c[t].how)})}}else{console.log("b2p %s is not connected",e)}}function b(t){if(l){for(var n in c){y(n,t)}}else{console.log("b2p %s is not connected",e)}}var i={generatePrivateKey:function(e){return cryptico.generateRSAKey(e,1024)},generatePublicKey:function(e){return cryptico.publicKeyString(e)},crypt:function(e,t){return cryptico.encrypt(e,t).cipher},decrypt:function(e,t){return cryptico.decrypt(e,t).plaintext},hash:function(e){return SHA256(e)}};var s=i.hash(e);var o=i.generatePrivateKey(t);var u=i.generatePublicKey(o);var a={who:s,how:u};var f=r;var l=false;var c={};var m=n(p,d,v);return{me:{who:e,how:u},announce:g,sendTo:function(e,t){y(i.hash(e),t)},sendToAll:b,register:function(e,t){h({who:i.hash(e),how:t})},registerMe:function(){h({who:s,how:u})},reconnect:function(){m=n(p,d,v)},disconnect:function(){m.close()},connected:function(){l}}}};(function(){Math.seedrandom()})()
+      </script>
+      <script type="text/javascript" src="">
+        function minichat(e,t,n,r){var i="<div class='container'> <div class='row'> <div class='input-group'> <span class='input-group-addon'>name</span> <input id='{{id}}_nameInp' name='{{id}}_nameInp' type='text' class='form-control' placeholder='your nick name' aria-describedby='basic-addon1'/> </div></div><div class='row'> <div class='input-group'> <span class='input-group-btn'> <button id='{{id}}_pssBtn' class='btn btn-default' type='button'>say</button> </span> <input id='{{id}}_pssInp' name='{{id}}_pssInp' type='text' class='form-control' placeholder='something to say' aria-describedby='basic-addon1'/> </div></div><div class='row'> <ul id='{{id}}_gossip' class='list-group'> </ul> </div></div>";var s='<li class="list-group-item">{{nick}} : {{msg}}</li>';$(document).ready(function(){$("#"+r).empty().html(Mustache.render(i,{id:r}));var o=Beer2Peer.connect(n,t,Beer2Peer.hobboConnector(e),function(e){try{var t=JSON.parse(e);$("#"+r+"_gossip").prepend($(Mustache.render(s,t)))}catch(n){}});$("#"+r+"_pssBtn").click(function(){o.sendTo(n,JSON.stringify({msg:$("#"+r+"_pssInp").val(),nick:$("#"+r+"_nameInp").val()}))});setInterval(function(){o.registerMe()},1e3)})}
+        
+        var url = 'wss://hobbo.herokuapp.com/funnyname';
+        var seed = 'rMBUYL7LqNGNuWAswgJZGJwUltN3eEf7';
+        var ident = 'fC9X6lqLHqi7jHvCHKMi6Xbq7Rx1UWoa';
+        var id = 'minichat';
+        minichat(url,seed,ident,id);
+      </script>
+    </body>
+</html>

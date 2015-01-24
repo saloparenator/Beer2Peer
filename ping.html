@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Beer2Peer Ping</title>
+    <link href="bootstrap.min.css" rel="stylesheet"/>
+	  <link rel="stylesheet" href="bootstrap-theme.min.css"/>
+	  
+	  <style type="text/css">
+
+	  </style>
+	  
+  </head>
+  <body>
+    
+    <div class='container'>
+      <h1 id='state'></h1>
+    </div>
+
+    <script src="jquery-1.11.1.min.js"></script>
+    <script src="cryptico.min.js"></script>
+    <script src="seedrandom.min.js"></script>
+    <script src="beer2peer.js"></script>
+    <script>
+
+      /**
+       * Annonymous closure main.
+       */
+      (function(){
+        $.get('https://baconipsum.com/api/?type=meat-and-filler',function(data){
+          console.log(data);
+        });
+        var b2p = null;
+        var lastTime = 0;
+        function ping(arrival){
+          console.log('rx %s',arrival);
+          try{
+            var data = JSON.parse(arrival);
+            console.log(data);
+            if (data.time && (data.time-lastTime)>5000){
+              lastTime = data.time;
+              console.log('tx ping')
+              b2p.sendTo('pong','ping');
+              b2p.sendTo('log','ping');
+            }
+          }catch(e){
+            console.log('not json')
+          }
+        }
+        
+        b2p = Beer2Peer.connect('ping',
+                                Beer2Peer.generateSeed(),
+                                Beer2Peer.hobboConnector('wss://hobbo.herokuapp.com/testing'),
+                                ping);
+        setInterval( function(){b2p.announce();} , 1000);
+        
+        //when document is fully loaded
+        $(document).ready(function (){
+
+        });
+        
+      })();
+    
+
+      
+      
+
+    </script>
+    
+  </body>
+</html>

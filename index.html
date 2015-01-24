@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+    <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Beer2Peer chat</title>
+    <link href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css" rel="stylesheet"/>
+    <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap-theme.min.css"/>
+    </head>
+    <body>
+      <div id='minichat'></div>
+      <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mustache.js/0.8.1/mustache.min.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/cryptico/0.0.1343522940/cryptico.min.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/seedrandom/2.3.11/seedrandom.min.js"></script>
+      <script type="text/javascript" src="beer2peer.js"></script>
+      <script type="text/javascript" src="">
+        function minichat(url,seed,ident,id){
+          var template = "<div class='container'> <div class='row'> <div class='input-group'> <span class='input-group-addon'>name</span> <input id='{{id}}_nameInp' name='{{id}}_nameInp' type='text' class='form-control' placeholder='your nick name' aria-describedby='basic-addon1'/> </div></div><div class='row'> <div class='input-group'> <span class='input-group-btn'> <button id='{{id}}_pssBtn' class='btn btn-default' type='button'>say</button> </span> <input id='{{id}}_pssInp' name='{{id}}_pssInp' type='text' class='form-control' placeholder='something to say' aria-describedby='basic-addon1'/> </div></div><div class='row'> <ul id='{{id}}_gossip' class='list-group'> </ul> </div></div>";
+          var templateLine = '<li class="list-group-item">{{nick}} : {{msg}}</li>';
+          $(document).ready(function(){
+            $('#'+id).empty().html(Mustache.render(template, {'id' :id}));
+            var b2p = Beer2Peer.connect(ident,
+                                        seed,
+                                        Beer2Peer.hobboConnector(url),
+                                        function(rawdata){
+                                          try{
+                                            var data = JSON.parse(rawdata);
+                                            $('#'+id+'_gossip').prepend($(Mustache.render(templateLine, data)));
+                                            //$('#'+id+'_gossip').prepend($('<li>').toggleClass('list-group-item').text(data.nick+' : '+data.msg));
+                                          }catch(e){}
+                                        });
+            $('#'+id+'_pssBtn').click(function(){
+              b2p.sendTo(ident,
+                         JSON.stringify({
+                           msg : $('#'+id+'_pssInp').val(),
+                           nick : $('#'+id+'_nameInp').val()
+                         }));
+            });
+            setInterval( function(){b2p.registerMe()} , 1000);
+          });
+        }
+        
+        
+                var url = 'wss://hobbo.herokuapp.com/funnyname';
+        var seed = 'rMBUYL7LqNGNuWAswgJZGJwUltN3eEf7';
+        var ident = 'fC9X6lqLHqi7jHvCHKMi6Xbq7Rx1UWoa';
+        var id = 'minichat';
+        minichat(url,seed,ident,id);
+      </script>
+    </body>
+</html>
