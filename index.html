@@ -15,7 +15,7 @@
       <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/cryptico/0.0.1343522940/cryptico.min.js"></script>
       <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/seedrandom/2.3.11/seedrandom.min.js"></script>
       <script type="text/javascript" src="beer2peer.js"></script>
-      <script type="text/javascript" src="">
+      <script type="text/javascript" >
         function minichat(url,seed,ident,id){
           var template = "<div class='container'> <div class='row'> <div class='input-group'> <span class='input-group-addon'>name</span> <input id='{{id}}_nameInp' name='{{id}}_nameInp' type='text' class='form-control' placeholder='your nick name' aria-describedby='basic-addon1'/> </div></div><div class='row'> <div class='input-group'> <span class='input-group-btn'> <button id='{{id}}_pssBtn' class='btn btn-default' type='button'>say</button> </span> <input id='{{id}}_pssInp' name='{{id}}_pssInp' type='text' class='form-control' placeholder='something to say' aria-describedby='basic-addon1'/> </div></div><div class='row'> <ul id='{{id}}_gossip' class='list-group'> </ul> </div></div>";
           var templateLine = '<li class="list-group-item">{{nick}} : {{msg}}</li>';
@@ -28,7 +28,6 @@
                                           try{
                                             var data = JSON.parse(rawdata);
                                             $('#'+id+'_gossip').prepend($(Mustache.render(templateLine, data)));
-                                            //$('#'+id+'_gossip').prepend($('<li>').toggleClass('list-group-item').text(data.nick+' : '+data.msg));
                                           }catch(e){}
                                         });
             $('#'+id+'_pssBtn').click(function(){
